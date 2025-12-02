@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="Points.ToolWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:Points"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="ToolWindow">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    
+    <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ListView Margin="8, 4, 4, 0"
+                      ItemsSource="{x:Bind ViewModel.Colors, Mode=OneWay}"
+                      SelectionChanged="{x:Bind ViewModel.ColorSelectionChanged, Mode=OneWay}"
+                      SelectedIndex="{x:Bind ViewModel.SelectedColorIndex, Mode=TwoWay}"
+                      SelectedItem="{x:Bind ViewModel.SelectedColor, Mode=TwoWay}">
+                <ListView.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="Colors" />
+                    </DataTemplate>
+                </ListView.HeaderTemplate>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="local:ColorItem">
+                        <Rectangle Fill="{x:Bind DisplayColor, Mode=OneWay}"
+                                   Width="75"
+                                   Height="75"
+                                   Margin="5" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <StackPanel Grid.Row="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+                <Button Command="{x:Bind ViewModel.RemoveColorCommand, Mode=OneWay}">
+                    <Viewbox MaxHeight="16"
+                             MaxWidth="16">
+                        <SymbolIcon Symbol="Delete" />
+                    </Viewbox>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Column="1"
+              Width="100">
+            <StackPanel>
+                <TextBlock Margin="0, 4" Text="Background" />
+                <!-- Use the flat style so the rectangle fills the button -->
+                <Button Style="{StaticResource FlatButtonStyle}"
+                        Command="{x:Bind ViewModel.SelectBackgroundColorCommand, Mode=OneWay}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Padding="0">
+                    <Rectangle Fill="{x:Bind ViewModel.BackgroundColor.DisplayColor, Mode=OneWay}"
+                               Width="74"
+                               Height="74"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ColorPicker x:Name="ColorPicker"
+                         Margin="16, 24, 24, 0"
+                         Color="{x:Bind ViewModel.SelectedColor.Color, Mode=TwoWay}" />
+
+            <StackPanel Grid.Row="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+                <Button Command="{x:Bind ViewModel.AddColorCommand, Mode=OneWay}">
+                    <Viewbox MaxHeight="16"
+                             MaxWidth="16">
+                        <SymbolIcon Symbol="Accept" />
+                    </Viewbox>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+    </Grid>
+</Window>
