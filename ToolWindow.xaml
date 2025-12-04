@@ -6,21 +6,23 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="ToolWindow">
+        Title="Points Options">
 
     <Window.SystemBackdrop>
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    
+
     <Grid Margin="8">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
         <Grid>
+            
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
@@ -56,12 +58,15 @@
                     </Viewbox>
                 </Button>
             </StackPanel>
+            
         </Grid>
 
         <Grid Grid.Column="1"
               Width="100">
+        
             <StackPanel>
-                <TextBlock Margin="0, 4" Text="Background" />
+                <TextBlock Margin="0, 4"
+                           Text="Background" />
                 <!-- Use the flat style so the rectangle fills the button -->
                 <Button Style="{StaticResource FlatButtonStyle}"
                         Command="{x:Bind ViewModel.SelectBackgroundColorCommand, Mode=OneWay}"
@@ -75,9 +80,11 @@
                                VerticalAlignment="Stretch" />
                 </Button>
             </StackPanel>
+        
         </Grid>
 
         <Grid Grid.Column="2">
+            
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -97,6 +104,79 @@
                     </Viewbox>
                 </Button>
             </StackPanel>
+        
+        </Grid>
+
+        <Grid Grid.Column="3"
+              Margin="24">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Margin="0, 12"
+                       Text="Pause Between Frames" />
+            <NumberBox Grid.Column="1"
+                       Width="88"
+                       Margin="8,4,0,0"
+                       MaxHeight="32"
+                       Value="{x:Bind ViewModel.PauseBetweenFrames, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Grid.Column="2"
+                    Margin="8,4,0,0"
+                    Command="{x:Bind ViewModel.SetPauseBetweenFramesCommand, Mode=OneWay}">
+                <Viewbox MaxHeight="16"
+                         MaxWidth="16">
+                    <SymbolIcon Symbol="Accept" />
+                </Viewbox>
+            </Button>
+
+            <TextBlock Grid.Row="1"
+                       Margin="0, 12"
+                       Text="Points Per Cluster" />
+            <NumberBox Grid.Row="1"
+                       Grid.Column="1"
+                       Width="88"
+                       Margin="8,4,0,0"
+                       MaxHeight="32"
+                       LargeChange="10"
+                       Value="{x:Bind ViewModel.PointsPerCluster, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Grid.Row="1"
+                    Grid.Column="2"
+                    Margin="8,4,0,0"
+                    Command="{x:Bind ViewModel.SetPointsPerClusterCommand, Mode=OneWay}">
+                <Viewbox MaxHeight="16"
+                         MaxWidth="16">
+                    <SymbolIcon Symbol="Accept" />
+                </Viewbox>
+            </Button>
+            
+            <TextBlock Grid.Row="2"
+                       Margin="0, 12"
+                       Text="Clusters Per Color" />
+            <NumberBox Grid.Row="2"
+                       Grid.Column="1"
+                       Width="88"
+                       Margin="8,4,0,0"
+                       MaxHeight="32"
+                       LargeChange="100"
+                       Value="{x:Bind ViewModel.ClustersPerColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Grid.Row="2"
+                    Grid.Column="2"
+                    Margin="8,4,0,0"
+                    Command="{x:Bind ViewModel.SetClustersPerColorCommand, Mode=OneWay}">
+                <Viewbox MaxHeight="16"
+                         MaxWidth="16">
+                    <SymbolIcon Symbol="Accept" />
+                </Viewbox>
+            </Button>
+
         </Grid>
 
     </Grid>

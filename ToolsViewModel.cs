@@ -19,6 +19,15 @@ namespace Points
         [ObservableProperty]
         public partial ColorItem? BackgroundColor { get; set; }
 
+        [ObservableProperty]
+        public partial int PauseBetweenFrames { get; set; }
+
+        [ObservableProperty]
+        public partial int PointsPerCluster { get; set; }
+
+        [ObservableProperty]
+        public partial int ClustersPerColor { get; set; }
+
 
         [ObservableProperty]
         public partial ColorItem? SelectedColor { get; set; }
@@ -83,6 +92,40 @@ namespace Points
             ToolWindow.SelectedColor = BackgroundColor.Color;
 
             isBackgroundColorSelected = true;
+        }
+
+        [RelayCommand]
+        public void SetPauseBetweenFrames()
+        {
+            if (MainWindow == null)
+            {
+                return;
+            }
+            MainWindow.PauseBetweenFrames = PauseBetweenFrames;
+        }
+
+        [RelayCommand]
+        public void SetPointsPerCluster()
+        {
+            if (MainWindow == null)
+            {
+                return;
+            }
+            MainWindow.PointsPerCluster = PointsPerCluster;
+
+            MainWindow?.CanvasControlInstance?.Invalidate();
+        }
+
+        [RelayCommand]
+        public void SetClustersPerColor()
+        {
+            if (MainWindow == null)
+            {
+                return;
+            }
+            MainWindow.ClustersPerColor = ClustersPerColor;
+
+            MainWindow?.CanvasControlInstance?.Invalidate();
         }
 
         public void ColorSelectionChanged(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)

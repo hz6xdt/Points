@@ -41,6 +41,9 @@ namespace Points
 
             ViewModel?.Colors = new ObservableCollection<ColorItem>(mainWindow.Colors.Select(c => new ColorItem { DisplayColor = new SolidColorBrush(c) }));
             ViewModel?.BackgroundColor = new ColorItem { DisplayColor = new SolidColorBrush(mainWindow.BackgroundColor) };
+            ViewModel?.PauseBetweenFrames = mainWindow.PauseBetweenFrames;
+            ViewModel?.PointsPerCluster = mainWindow.PointsPerCluster;
+            ViewModel?.ClustersPerColor = mainWindow.ClustersPerColor;
 
             ViewModel?.ToolWindow = this;
             ViewModel?.MainWindow = mainWindow;
