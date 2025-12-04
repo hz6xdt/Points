@@ -13,21 +13,15 @@ using Windows.Foundation;
 using Windows.UI;
 using WinRT.Interop;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace Points
 {
-    /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class MainWindow : Window
     {
         private readonly AppWindow? appWindow;
         private readonly Window toolWindow;
 
-        private int width;
-        private int height;
+        private const int toolWindowWidth = 1024;
+        private const int toolWindowHeight = 800;
 
 
         // Cancellation token to stop the background loop when window closes
@@ -35,6 +29,10 @@ namespace Points
         // Ensure loop starts only once after window is visible/activated
         private bool renderLoopStarted;
 
+        private Color[] CanvasColors = [];
+
+        private bool clearingCanvas = false;
+        private bool clearCanvas = false;
 
 
         public Color BackgroundColor { get; set; } = Color.FromArgb(40, 80, 80, 40);
@@ -53,11 +51,12 @@ namespace Points
         public CanvasControl? CanvasControlInstance { get; private set; }
 
 
+        public int Frames { get; set; } = 7;
         public int PauseBetweenFrames { get; set; } = 9;
 
         public int PointsPerCluster { get; set; } = 100;
 
-        public int ClustersPerColor { get; set; } = 200;
+        public int ClustersPerColor { get; set; } = 100;
 
 
 
@@ -75,7 +74,7 @@ namespace Points
 
 
             // Move the tool window to the secondary display (index 1) and center it there before activation
-            MoveWindowToMonitorCentered(toolWindow, 1, desiredWidthDips: 1024, desiredHeightDips: 800);
+            MoveWindowToMonitorCentered(toolWindow, 1, desiredWidthDips: toolWindowWidth, desiredHeightDips: toolWindowHeight);
 
 
             AppWindow toolAppWindow = GetAppWindowForWindow(toolWindow);
@@ -89,6 +88,8 @@ namespace Points
             // Disable resizing for the tool window so it can't be resized or maximized
             DisableWindowResize(toolWindow);
         }
+
+
 
 
         private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -116,11 +117,34 @@ namespace Points
                 {
                     while (!token.IsCancellationRequested)
                     {
-                        // Marshal the Invalidate call to the UI thread
-                        uiDispatcher?.TryEnqueue(() => CanvasControlInstance?.Invalidate());
+
+                        for (int f = 0; f < Frames; f++)
+                        {
+                            // Marshal the Invalidate call to the UI thread
+                            uiDispatcher?.TryEnqueue(() => CanvasControlInstance?.Invalidate());
+                            // Wait without blocking the UI thread
+                            await Task.Delay(TimeSpan.FromMilliseconds(300), token);
+
+                            if (clearingCanvas && f == Frames - 1)
+                            {
+                                clearCanvas = true;
+                            }
+                        }
+
+                        int delay = PauseBetweenFrames;
+
+                        if (clearingCanvas)
+                        {
+                            delay = 1;
+                            clearingCanvas = false;
+                        }
+                        else
+                        {
+                            clearingCanvas = true;
+                        }
 
                         // Wait without blocking the UI thread
-                        await Task.Delay(TimeSpan.FromSeconds(PauseBetweenFrames), token);
+                        await Task.Delay(TimeSpan.FromSeconds(delay), token);
                     }
                 }
                 catch (OperationCanceledException)
@@ -132,58 +156,85 @@ namespace Points
 
 
 
+
+
+
         private void Canvas_Draw(CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
         {
             CanvasDrawingSession ds = args.DrawingSession;
-            ds.Clear(BackgroundColor);
 
-            width = (int)sender.ActualWidth;
-            height = (int)sender.ActualHeight;
+            int width = (int)sender.ActualWidth;
+            int height = (int)sender.ActualHeight;
 
             //Debug.WriteLine($"Screen Dimensions: {width}, {height}");
+
+            if (CanvasColors.Length != width * height)
+            {
+                CanvasColors = new Color[width * height];
+            }
+
 
 
             Random rand = new();
 
-            Color[] colors = new Color[width * height];
-
-
-            for (int k = 0; k < Colors.Count; k++)
+            if (clearCanvas)
             {
-                for (int i = 0; i < ClustersPerColor; i++)
+                for (int i = 0; i < CanvasColors.Length; i++)
+                {
+                    CanvasColors[i] = BackgroundColor;
+                }
+                clearCanvas = false;
+            }
+            else if (clearingCanvas)
+            {
+                for (int i = 0; i < CanvasColors.Length / Frames * 3; i++)
                 {
                     int x = rand.Next(4, width - 4);
                     int y = rand.Next(4, height - 4);
 
-                    //Debug.WriteLine($"Start Position: {x},{y}");
-
-                    for (int j = 0; j < PointsPerCluster; j++)
+                    CanvasColors[x + y * width] = BackgroundColor;
+                }
+            }
+            else
+            {
+                for (int k = 0; k < Colors.Count; k++)
+                {
+                    for (int i = 0; i < ClustersPerColor; i++)
                     {
-                        int xx = rand.Next(-9, 10);
-                        int yy = rand.Next(-9, 10);
-                        x = Math.Clamp(x + xx, 0, width - 1);
-                        y = Math.Clamp(y + yy, 0, height - 1);
+                        int x = rand.Next(4, width - 4);
+                        int y = rand.Next(4, height - 4);
 
-                        //Debug.WriteLine($"Point Position: {x},{y}");
+                        //Debug.WriteLine($"Start Position: {x},{y}");
 
-                        int rr = rand.Next(-10, 10);
-                        int gg = rand.Next(-10, 10);
-                        int bb = rand.Next(-10, 10);
-                        int aa = rand.Next(-10, 10);
+                        for (int j = 0; j < PointsPerCluster; j++)
+                        {
+                            int xx = rand.Next(-9, 10);
+                            int yy = rand.Next(-9, 10);
+                            x = Math.Clamp(x + xx, 0, width - 1);
+                            y = Math.Clamp(y + yy, 0, height - 1);
 
-                        byte red = (byte)Math.Clamp(Colors[k].R + rr, 0, 255);
-                        byte blue = (byte)Math.Clamp(Colors[k].B + bb, 0, 255);
-                        byte green = (byte)Math.Clamp(Colors[k].G + gg, 0, 255);
-                        byte alpha = (byte)Math.Clamp(Colors[k].A + aa, 0, 255);
+                            //Debug.WriteLine($"Point Position: {x},{y}");
 
-                        colors[x + y * width] = Color.FromArgb(alpha, red, green, blue);
+                            int rr = rand.Next(-10, 10);
+                            int gg = rand.Next(-10, 10);
+                            int bb = rand.Next(-10, 10);
+                            int aa = rand.Next(-10, 10);
+
+                            byte red = (byte)Math.Clamp(Colors[k].R + rr, 0, 255);
+                            byte blue = (byte)Math.Clamp(Colors[k].B + bb, 0, 255);
+                            byte green = (byte)Math.Clamp(Colors[k].G + gg, 0, 255);
+                            byte alpha = (byte)Math.Clamp(Colors[k].A + aa, 0, 255);
+
+                            CanvasColors[x + y * width] = Color.FromArgb(alpha, red, green, blue);
+                        }
                     }
                 }
             }
 
 
 
-            CanvasBitmap bitmap = CanvasBitmap.CreateFromColors(ds, colors, width, height);
+
+            CanvasBitmap bitmap = CanvasBitmap.CreateFromColors(ds, CanvasColors, width, height);
 
 
             ds.DrawImage(bitmap, new Rect(0, 0, width, height));
@@ -218,6 +269,9 @@ namespace Points
             toolWindow.Close();
             this.Close();
         }
+
+
+
 
 
 
