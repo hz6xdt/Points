@@ -48,5 +48,20 @@ namespace Points
             ViewModel?.ToolWindow = this;
             ViewModel?.MainWindow = mainWindow;
         }
+
+        public void FocusPauseBetweenFramesResetButton()
+        {
+            PauseBetweenFramesResetButton.Focus(FocusState.Programmatic);
+        }
+
+        public void FocusPointsPerClusterResetButton()
+        {
+            PointsPerClusterResetButton.Focus(FocusState.Programmatic);
+        }
+
+        public void FocusClustersPerColorResetButton()
+        {
+            ClustersPerColorResetButton.Focus(FocusState.Programmatic);
+        }
     }
 }

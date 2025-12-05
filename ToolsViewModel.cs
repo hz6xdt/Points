@@ -2,6 +2,7 @@
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
 
 namespace Points
 {
@@ -137,6 +138,26 @@ namespace Points
             }
 
             ToolWindow.SelectedColor = SelectedColor.Color;
+        }
+
+
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
+        public void PauseBetweenFramesValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
+        {
+            ToolWindow?.FocusPauseBetweenFramesResetButton();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
+        public void PointsPerClusterValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
+        {
+            ToolWindow?.FocusPointsPerClusterResetButton();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
+        public void ClustersPerColorValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
+        {
+            ToolWindow?.FocusClustersPerColorResetButton();
         }
     }
 }

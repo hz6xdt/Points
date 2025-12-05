@@ -127,9 +127,11 @@
                        Width="88"
                        Margin="8,4,0,0"
                        MaxHeight="32"
+                       ValueChanged="{x:Bind ViewModel.PauseBetweenFramesValueChanged}"
                        Value="{x:Bind ViewModel.PauseBetweenFrames, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <Button Grid.Column="2"
                     Margin="8,4,0,0"
+                    x:Name="PauseBetweenFramesResetButton"
                     Command="{x:Bind ViewModel.SetPauseBetweenFramesCommand, Mode=OneWay}">
                 <Viewbox MaxHeight="16"
                          MaxWidth="16">
@@ -146,10 +148,12 @@
                        Margin="8,4,0,0"
                        MaxHeight="32"
                        LargeChange="10"
+                       ValueChanged="{x:Bind ViewModel.PointsPerClusterValueChanged}"
                        Value="{x:Bind ViewModel.PointsPerCluster, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <Button Grid.Row="1"
                     Grid.Column="2"
                     Margin="8,4,0,0"
+                    x:Name="PointsPerClusterResetButton"
                     Command="{x:Bind ViewModel.SetPointsPerClusterCommand, Mode=OneWay}">
                 <Viewbox MaxHeight="16"
                          MaxWidth="16">
@@ -166,10 +170,12 @@
                        Margin="8,4,0,0"
                        MaxHeight="32"
                        LargeChange="100"
+                       ValueChanged="{x:Bind ViewModel.ClustersPerColorValueChanged}"
                        Value="{x:Bind ViewModel.ClustersPerColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <Button Grid.Row="2"
                     Grid.Column="2"
                     Margin="8,4,0,0"
+                    x:Name="ClustersPerColorResetButton"
                     Command="{x:Bind ViewModel.SetClustersPerColorCommand, Mode=OneWay}">
                 <Viewbox MaxHeight="16"
                          MaxWidth="16">
