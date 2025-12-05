@@ -114,25 +114,28 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBlock Margin="0, 12"
-                       Text="Pause Between Frames" />
+                       Text="Pause Between Runs" />
             <NumberBox Grid.Column="1"
                        Width="88"
                        Margin="8,4,0,0"
                        MaxHeight="32"
-                       ValueChanged="{x:Bind ViewModel.PauseBetweenFramesValueChanged}"
-                       Value="{x:Bind ViewModel.PauseBetweenFrames, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                       ValueChanged="{x:Bind ViewModel.PauseBetweenRunsValueChanged}"
+                       Value="{x:Bind ViewModel.PauseBetweenRuns, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <Button Grid.Column="2"
                     Margin="8,4,0,0"
-                    x:Name="PauseBetweenFramesResetButton"
-                    Command="{x:Bind ViewModel.SetPauseBetweenFramesCommand, Mode=OneWay}">
+                    x:Name="PauseBetweenRunsResetButton"
+                    Command="{x:Bind ViewModel.SetPauseBetweenRunsCommand, Mode=OneWay}">
                 <Viewbox MaxHeight="16"
                          MaxWidth="16">
                     <SymbolIcon Symbol="Accept" />
@@ -183,6 +186,15 @@
                 </Viewbox>
             </Button>
 
+
+            <Button Grid.Column="4"
+                    Grid.Row="4"
+                    Command="{x:Bind ViewModel.SaveSettingsCommand, Mode=OneWay}">
+                <Viewbox MaxHeight="16"
+                         MaxWidth="16">
+                    <SymbolIcon Symbol="Save" />
+                </Viewbox>
+            </Button>
         </Grid>
 
     </Grid>

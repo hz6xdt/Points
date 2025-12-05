@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Graphics.Canvas;
@@ -23,10 +27,12 @@ namespace Points
         private const int toolWindowWidth = 1024;
         private const int toolWindowHeight = 800;
 
+        // Settings file
+        private readonly string settingsFilePath;
 
         // Cancellation token to stop the background loop when window closes
         private CancellationTokenSource? renderLoopCts;
-        // Ensure loop starts only once after window is visible/activated
+        // Ensure loop starts only once after the window is visible/activated
         private bool renderLoopStarted;
 
         private Color[] CanvasColors = [];
@@ -52,7 +58,7 @@ namespace Points
 
 
         public int Frames { get; set; } = 7;
-        public int PauseBetweenFrames { get; set; } = 9;
+        public int PauseBetweenRuns { get; set; } = 9;
 
         public int PointsPerCluster { get; set; } = 1000;
 
@@ -62,6 +68,20 @@ namespace Points
 
         public MainWindow()
         {
+            // prepare settings path (LocalApplicationData\Points\settings.json)
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string dir = Path.Combine(appData, "Points");
+            if (!Directory.Exists(dir))
+            {
+                try
+                { Directory.CreateDirectory(dir); }
+                catch { /* ignore */ }
+            }
+            settingsFilePath = Path.Combine(dir, "settings.json");
+
+            // load persisted settings (if any) before UI initialize so values are applied
+            LoadSettings();
+
             InitializeComponent();
             this.Activated += MainWindow_Activated;
 
@@ -131,7 +151,7 @@ namespace Points
                             }
                         }
 
-                        int delay = PauseBetweenFrames;
+                        int delay = PauseBetweenRuns;
 
                         if (clearingCanvas)
                         {
@@ -240,8 +260,12 @@ namespace Points
             ds.DrawImage(bitmap, new Rect(0, 0, width, height));
         }
 
+
         private void Window_Closed(object sender, WindowEventArgs args)
         {
+            // Save settings on exit
+            SaveSettings();
+
             // Cancel the background loop and clean up the CanvasControl
             if (renderLoopCts != null && !renderLoopCts.IsCancellationRequested)
             {
@@ -256,6 +280,7 @@ namespace Points
                 this.CanvasControlInstance = null;
             }
         }
+
 
         private static AppWindow GetAppWindowForWindow(Window window)
         {
@@ -275,8 +300,83 @@ namespace Points
 
 
 
+        // --- Settings persistence helpers ---
 
+        private sealed class AppSettings
+        {
+            public int PauseBetweenRuns { get; set; }
+            public int PointsPerCluster { get; set; }
+            public int ClustersPerColor { get; set; }
+            public uint BackgroundColorArgb { get; set; }
+            public List<uint>? ColorsArgb { get; set; }
+        }
 
+        public void SaveSettings()
+        {
+            try
+            {
+                AppSettings s = new()
+                {
+                    PauseBetweenRuns = PauseBetweenRuns,
+                    PointsPerCluster = PointsPerCluster,
+                    ClustersPerColor = ClustersPerColor,
+                    BackgroundColorArgb = ColorToUint(BackgroundColor),
+                    ColorsArgb = Colors?.Select(ColorToUint).ToList()
+                };
+
+                JsonSerializerOptions options = new()
+                {
+                    WriteIndented = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                };
+
+                string json = JsonSerializer.Serialize(s, options);
+                File.WriteAllText(settingsFilePath, json);
+            }
+            catch
+            {
+                // ignore save errors
+            }
+        }
+
+        private void LoadSettings()
+        {
+            try
+            {
+                if (!File.Exists(settingsFilePath))
+                {
+                    return;
+                }
+
+                string json = File.ReadAllText(settingsFilePath);
+                AppSettings? s = JsonSerializer.Deserialize<AppSettings>(json);
+                if (s is null)
+                {
+                    return;
+                }
+
+                PauseBetweenRuns = s.PauseBetweenRuns > 0 ? s.PauseBetweenRuns : PauseBetweenRuns;
+                PointsPerCluster = s.PointsPerCluster > 0 ? s.PointsPerCluster : PointsPerCluster;
+                ClustersPerColor = s.ClustersPerColor > 0 ? s.ClustersPerColor : ClustersPerColor;
+
+                BackgroundColor = UintToColor(s.BackgroundColorArgb);
+
+                if (s.ColorsArgb != null && s.ColorsArgb.Count > 0)
+                {
+                    Colors = s.ColorsArgb.Select(UintToColor).ToList();
+                }
+            }
+            catch
+            {
+                // ignore load errors and keep defaults
+            }
+        }
+
+        private static uint ColorToUint(Color c) =>
+            (uint)((c.A << 24) | (c.R << 16) | (c.G << 8) | c.B);
+
+        private static Color UintToColor(uint v) =>
+            Color.FromArgb((byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 
         // --- Monitor / window placement helpers ---
 

@@ -21,7 +21,7 @@ namespace Points
         public partial ColorItem? BackgroundColor { get; set; }
 
         [ObservableProperty]
-        public partial int PauseBetweenFrames { get; set; }
+        public partial int PauseBetweenRuns { get; set; }
 
         [ObservableProperty]
         public partial int PointsPerCluster { get; set; }
@@ -97,13 +97,13 @@ namespace Points
         }
 
         [RelayCommand]
-        public void SetPauseBetweenFrames()
+        public void SetPauseBetweenRuns()
         {
             if (MainWindow == null)
             {
                 return;
             }
-            MainWindow.PauseBetweenFrames = PauseBetweenFrames;
+            MainWindow.PauseBetweenRuns = PauseBetweenRuns;
         }
 
         [RelayCommand]
@@ -130,6 +130,18 @@ namespace Points
             MainWindow?.CanvasControlInstance?.Invalidate();
         }
 
+
+        [RelayCommand]
+        public void SaveSettings()
+        {
+            if (MainWindow == null)
+            {
+                return;
+            }
+
+            MainWindow.SaveSettings();
+        }
+
         public void ColorSelectionChanged(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)
         {
             if (ToolWindow == null || SelectedColor == null)
@@ -143,9 +155,9 @@ namespace Points
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
-        public void PauseBetweenFramesValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
+        public void PauseBetweenRunsValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
         {
-            ToolWindow?.FocusPauseBetweenFramesResetButton();
+            ToolWindow?.FocusPauseBetweenRunsResetButton();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]

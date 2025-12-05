@@ -41,7 +41,7 @@ namespace Points
 
             ViewModel?.Colors = new ObservableCollection<ColorItem>(mainWindow.Colors.Select(c => new ColorItem { DisplayColor = new SolidColorBrush(c) }));
             ViewModel?.BackgroundColor = new ColorItem { DisplayColor = new SolidColorBrush(mainWindow.BackgroundColor) };
-            ViewModel?.PauseBetweenFrames = mainWindow.PauseBetweenFrames;
+            ViewModel?.PauseBetweenRuns = mainWindow.PauseBetweenRuns;
             ViewModel?.PointsPerCluster = mainWindow.PointsPerCluster;
             ViewModel?.ClustersPerColor = mainWindow.ClustersPerColor;
 
@@ -49,9 +49,9 @@ namespace Points
             ViewModel?.MainWindow = mainWindow;
         }
 
-        public void FocusPauseBetweenFramesResetButton()
+        public void FocusPauseBetweenRunsResetButton()
         {
-            PauseBetweenFramesResetButton.Focus(FocusState.Programmatic);
+            PauseBetweenRunsResetButton.Focus(FocusState.Programmatic);
         }
 
         public void FocusPointsPerClusterResetButton()
