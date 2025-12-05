@@ -32,10 +32,10 @@ namespace Points
         private Color[] CanvasColors = [];
 
         private bool clearingCanvas = false;
-        private bool clearCanvas = false;
+        private bool clearCanvas = true;
 
 
-        public Color BackgroundColor { get; set; } = Color.FromArgb(40, 80, 80, 40);
+        public Color BackgroundColor { get; set; } = Color.FromArgb(255, 250, 246, 240);
 
 
         public List<Color> Colors = [Color.FromArgb(255, 0x1d, 0x8a, 0x14),
@@ -54,9 +54,9 @@ namespace Points
         public int Frames { get; set; } = 7;
         public int PauseBetweenFrames { get; set; } = 9;
 
-        public int PointsPerCluster { get; set; } = 100;
+        public int PointsPerCluster { get; set; } = 1000;
 
-        public int ClustersPerColor { get; set; } = 100;
+        public int ClustersPerColor { get; set; } = 4;
 
 
 
@@ -123,7 +123,7 @@ namespace Points
                             // Marshal the Invalidate call to the UI thread
                             uiDispatcher?.TryEnqueue(() => CanvasControlInstance?.Invalidate());
                             // Wait without blocking the UI thread
-                            await Task.Delay(TimeSpan.FromMilliseconds(300), token);
+                            await Task.Delay(TimeSpan.FromMilliseconds(400), token);
 
                             if (clearingCanvas && f == Frames - 1)
                             {

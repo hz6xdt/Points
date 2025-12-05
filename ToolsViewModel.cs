@@ -48,6 +48,7 @@ namespace Points
             {
                 BackgroundColor?.Color = ToolWindow.SelectedColor;
                 MainWindow?.BackgroundColor = ToolWindow.SelectedColor;
+                isBackgroundColorSelected = false;
             }
             else
             {
@@ -130,8 +131,6 @@ namespace Points
 
         public void ColorSelectionChanged(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)
         {
-            isBackgroundColorSelected = false;
-
             if (ToolWindow == null || SelectedColor == null)
             {
                 return;
