@@ -9,59 +9,58 @@ using Windows.UI;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace Points
+namespace Points;
+
+public sealed partial class ToolWindow : Window
 {
-    public sealed partial class ToolWindow : Window
+    public ToolsViewModel? ViewModel;
+
+    private readonly MainWindow mainWindow;
+
+
+    public Color SelectedColor
     {
-        public ToolsViewModel? ViewModel;
-
-        private readonly MainWindow mainWindow;
-
-
-        public Color SelectedColor
+        get
         {
-            get
-            {
-                return ColorPicker.Color;
-            }
-            set
-            {
-                ColorPicker.Color = value;
-            }
+            return ColorPicker.Color;
         }
-
-
-        public ToolWindow(MainWindow mainWindow)
+        set
         {
-            ViewModel = App.HostContainer?.Services.GetService<ToolsViewModel>();
-
-            InitializeComponent();
-
-            this.mainWindow = mainWindow;
-
-            ViewModel?.Colors = new ObservableCollection<ColorItem>(mainWindow.Colors.Select(c => new ColorItem { DisplayColor = new SolidColorBrush(c) }));
-            ViewModel?.BackgroundColor = new ColorItem { DisplayColor = new SolidColorBrush(mainWindow.BackgroundColor) };
-            ViewModel?.PauseBetweenRuns = mainWindow.PauseBetweenRuns;
-            ViewModel?.PointsPerCluster = mainWindow.PointsPerCluster;
-            ViewModel?.ClustersPerColor = mainWindow.ClustersPerColor;
-
-            ViewModel?.ToolWindow = this;
-            ViewModel?.MainWindow = mainWindow;
+            ColorPicker.Color = value;
         }
+    }
 
-        public void FocusPauseBetweenRunsResetButton()
-        {
-            PauseBetweenRunsResetButton.Focus(FocusState.Programmatic);
-        }
 
-        public void FocusPointsPerClusterResetButton()
-        {
-            PointsPerClusterResetButton.Focus(FocusState.Programmatic);
-        }
+    public ToolWindow(MainWindow mainWindow)
+    {
+        ViewModel = App.HostContainer?.Services.GetService<ToolsViewModel>();
 
-        public void FocusClustersPerColorResetButton()
-        {
-            ClustersPerColorResetButton.Focus(FocusState.Programmatic);
-        }
+        InitializeComponent();
+
+        this.mainWindow = mainWindow;
+
+        ViewModel?.Colors = new ObservableCollection<ColorItem>(mainWindow.Colors.Select(c => new ColorItem { DisplayColor = new SolidColorBrush(c) }));
+        ViewModel?.BackgroundColor = new ColorItem { DisplayColor = new SolidColorBrush(mainWindow.BackgroundColor) };
+        ViewModel?.PauseBetweenRuns = mainWindow.PauseBetweenRuns;
+        ViewModel?.PointsPerCluster = mainWindow.PointsPerCluster;
+        ViewModel?.ClustersPerColor = mainWindow.ClustersPerColor;
+
+        ViewModel?.ToolWindow = this;
+        ViewModel?.MainWindow = mainWindow;
+    }
+
+    public void FocusPauseBetweenRunsResetButton()
+    {
+        PauseBetweenRunsResetButton.Focus(FocusState.Programmatic);
+    }
+
+    public void FocusPointsPerClusterResetButton()
+    {
+        PointsPerClusterResetButton.Focus(FocusState.Programmatic);
+    }
+
+    public void FocusClustersPerColorResetButton()
+    {
+        ClustersPerColorResetButton.Focus(FocusState.Programmatic);
     }
 }

@@ -4,172 +4,171 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 
-namespace Points
+namespace Points;
+
+public partial class ToolsViewModel : ObservableObject
 {
-    public partial class ToolsViewModel : ObservableObject
+    public ToolWindow? ToolWindow { get; set; }
+    public MainWindow? MainWindow { get; set; }
+
+    public bool isBackgroundColorSelected = false;
+
+
+    [ObservableProperty]
+    public partial ObservableCollection<ColorItem> Colors { get; set; } = [];
+
+    [ObservableProperty]
+    public partial ColorItem? BackgroundColor { get; set; }
+
+    [ObservableProperty]
+    public partial int PauseBetweenRuns { get; set; }
+
+    [ObservableProperty]
+    public partial int PointsPerCluster { get; set; }
+
+    [ObservableProperty]
+    public partial int ClustersPerColor { get; set; }
+
+
+    [ObservableProperty]
+    public partial ColorItem? SelectedColor { get; set; }
+
+    [ObservableProperty]
+    public partial int SelectedColorIndex { get; set; } = -1;
+
+
+    [RelayCommand]
+    public void AddColor()
     {
-        public ToolWindow? ToolWindow { get; set; }
-        public MainWindow? MainWindow { get; set; }
-
-        public bool isBackgroundColorSelected = false;
-
-
-        [ObservableProperty]
-        public partial ObservableCollection<ColorItem> Colors { get; set; } = [];
-
-        [ObservableProperty]
-        public partial ColorItem? BackgroundColor { get; set; }
-
-        [ObservableProperty]
-        public partial int PauseBetweenRuns { get; set; }
-
-        [ObservableProperty]
-        public partial int PointsPerCluster { get; set; }
-
-        [ObservableProperty]
-        public partial int ClustersPerColor { get; set; }
-
-
-        [ObservableProperty]
-        public partial ColorItem? SelectedColor { get; set; }
-
-        [ObservableProperty]
-        public partial int SelectedColorIndex { get; set; } = -1;
-
-
-        [RelayCommand]
-        public void AddColor()
+        if (ToolWindow == null)
         {
-            if (ToolWindow == null)
-            {
-                return;
-            }
-
-            if (isBackgroundColorSelected)
-            {
-                BackgroundColor?.Color = ToolWindow.SelectedColor;
-                MainWindow?.BackgroundColor = ToolWindow.SelectedColor;
-                isBackgroundColorSelected = false;
-            }
-            else
-            {
-                if (SelectedColor != null)
-                {
-                    Colors[SelectedColorIndex].Color = ToolWindow.SelectedColor;
-                }
-                else
-                {
-                    Colors.Add(new ColorItem { Color = ToolWindow.SelectedColor });
-                }
-                Colors = new ObservableCollection<ColorItem>(Colors);
-                MainWindow?.Colors = Colors.Select(c => c.Color).ToList();
-            }
-
-            MainWindow?.CanvasControlInstance?.Invalidate();
+            return;
         }
 
-        [RelayCommand]
-        public void RemoveColor()
+        if (isBackgroundColorSelected)
+        {
+            BackgroundColor?.Color = ToolWindow.SelectedColor;
+            MainWindow?.BackgroundColor = ToolWindow.SelectedColor;
+            isBackgroundColorSelected = false;
+        }
+        else
         {
             if (SelectedColor != null)
             {
-                Colors.Remove(SelectedColor);
+                Colors[SelectedColorIndex].Color = ToolWindow.SelectedColor;
             }
-
+            else
+            {
+                Colors.Add(new ColorItem { Color = ToolWindow.SelectedColor });
+            }
+            Colors = new ObservableCollection<ColorItem>(Colors);
             MainWindow?.Colors = Colors.Select(c => c.Color).ToList();
-            MainWindow?.CanvasControlInstance?.Invalidate();
         }
 
-        [RelayCommand]
-        public void SelectBackgroundColor()
+        MainWindow?.CanvasControlInstance?.Invalidate();
+    }
+
+    [RelayCommand]
+    public void RemoveColor()
+    {
+        if (SelectedColor != null)
         {
-            if (ToolWindow == null || BackgroundColor == null)
-            {
-                return;
-            }
-
-            SelectedColorIndex = -1;
-            SelectedColor = null;
-
-            ToolWindow.SelectedColor = BackgroundColor.Color;
-
-            isBackgroundColorSelected = true;
+            Colors.Remove(SelectedColor);
         }
 
-        [RelayCommand]
-        public void SetPauseBetweenRuns()
+        MainWindow?.Colors = Colors.Select(c => c.Color).ToList();
+        MainWindow?.CanvasControlInstance?.Invalidate();
+    }
+
+    [RelayCommand]
+    public void SelectBackgroundColor()
+    {
+        if (ToolWindow == null || BackgroundColor == null)
         {
-            if (MainWindow == null)
-            {
-                return;
-            }
-            MainWindow.PauseBetweenRuns = PauseBetweenRuns;
+            return;
         }
 
-        [RelayCommand]
-        public void SetPointsPerCluster()
+        SelectedColorIndex = -1;
+        SelectedColor = null;
+
+        ToolWindow.SelectedColor = BackgroundColor.Color;
+
+        isBackgroundColorSelected = true;
+    }
+
+    [RelayCommand]
+    public void SetPauseBetweenRuns()
+    {
+        if (MainWindow == null)
         {
-            if (MainWindow == null)
-            {
-                return;
-            }
-            MainWindow.PointsPerCluster = PointsPerCluster;
-
-            MainWindow?.CanvasControlInstance?.Invalidate();
+            return;
         }
+        MainWindow.PauseBetweenRuns = PauseBetweenRuns;
+    }
 
-        [RelayCommand]
-        public void SetClustersPerColor()
+    [RelayCommand]
+    public void SetPointsPerCluster()
+    {
+        if (MainWindow == null)
         {
-            if (MainWindow == null)
-            {
-                return;
-            }
-            MainWindow.ClustersPerColor = ClustersPerColor;
-
-            MainWindow?.CanvasControlInstance?.Invalidate();
+            return;
         }
+        MainWindow.PointsPerCluster = PointsPerCluster;
 
+        MainWindow?.CanvasControlInstance?.Invalidate();
+    }
 
-        [RelayCommand]
-        public void SaveSettings()
+    [RelayCommand]
+    public void SetClustersPerColor()
+    {
+        if (MainWindow == null)
         {
-            if (MainWindow == null)
-            {
-                return;
-            }
-
-            MainWindow.SaveSettings();
+            return;
         }
+        MainWindow.ClustersPerColor = ClustersPerColor;
 
-        public void ColorSelectionChanged(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)
+        MainWindow?.CanvasControlInstance?.Invalidate();
+    }
+
+
+    [RelayCommand]
+    public void SaveSettings()
+    {
+        if (MainWindow == null)
         {
-            if (ToolWindow == null || SelectedColor == null)
-            {
-                return;
-            }
-
-            ToolWindow.SelectedColor = SelectedColor.Color;
+            return;
         }
 
+        MainWindow.SaveSettings();
+    }
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
-        public void PauseBetweenRunsValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
+    public void ColorSelectionChanged(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)
+    {
+        if (ToolWindow == null || SelectedColor == null)
         {
-            ToolWindow?.FocusPauseBetweenRunsResetButton();
+            return;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
-        public void PointsPerClusterValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
-        {
-            ToolWindow?.FocusPointsPerClusterResetButton();
-        }
+        ToolWindow.SelectedColor = SelectedColor.Color;
+    }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
-        public void ClustersPerColorValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
-        {
-            ToolWindow?.FocusClustersPerColorResetButton();
-        }
+
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
+    public void PauseBetweenRunsValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
+    {
+        ToolWindow?.FocusPauseBetweenRunsResetButton();
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
+    public void PointsPerClusterValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
+    {
+        ToolWindow?.FocusPointsPerClusterResetButton();
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
+    public void ClustersPerColorValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
+    {
+        ToolWindow?.FocusClustersPerColorResetButton();
     }
 }
