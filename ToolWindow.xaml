@@ -22,7 +22,7 @@
         </Grid.ColumnDefinitions>
 
         <Grid>
-            
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
@@ -58,12 +58,12 @@
                     </Viewbox>
                 </Button>
             </StackPanel>
-            
+
         </Grid>
 
         <Grid Grid.Column="1"
               Width="100">
-        
+
             <StackPanel>
                 <TextBlock Margin="0, 4"
                            Text="Background" />
@@ -80,11 +80,11 @@
                                VerticalAlignment="Stretch" />
                 </Button>
             </StackPanel>
-        
+
         </Grid>
 
         <Grid Grid.Column="2">
-            
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -104,7 +104,7 @@
                     </Viewbox>
                 </Button>
             </StackPanel>
-        
+
         </Grid>
 
         <Grid Grid.Column="3"
@@ -118,7 +118,6 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -147,6 +146,7 @@
                        Text="Points Per Cluster" />
             <NumberBox Grid.Row="1"
                        Grid.Column="1"
+                       x:Name="PointsPerClusterNumberBox"
                        Width="88"
                        Margin="8,4,0,0"
                        MaxHeight="32"
@@ -163,12 +163,13 @@
                     <SymbolIcon Symbol="Accept" />
                 </Viewbox>
             </Button>
-            
+
             <TextBlock Grid.Row="2"
                        Margin="0, 12"
                        Text="Clusters Per Color" />
             <NumberBox Grid.Row="2"
                        Grid.Column="1"
+                       x:Name="ClustersPerColorNumberBox"
                        Width="88"
                        Margin="8,4,0,0"
                        MaxHeight="32"
@@ -187,14 +188,53 @@
             </Button>
 
 
-            <Button Grid.Column="4"
-                    Grid.Row="4"
-                    Command="{x:Bind ViewModel.SaveSettingsCommand, Mode=OneWay}">
-                <Viewbox MaxHeight="16"
-                         MaxWidth="16">
-                    <SymbolIcon Symbol="Save" />
-                </Viewbox>
-            </Button>
+
+            <ListView Grid.Row="3"
+                      Grid.ColumnSpan="3"
+                      Margin="0, 32"
+                      ItemsSource="{x:Bind ViewModel.ColorsListNames, Mode=OneWay}"
+                      SelectedItem="{x:Bind ViewModel.SelectedColorListName, Mode=TwoWay}"
+                      SelectedIndex="{x:Bind ViewModel.SelectedColorListIndex, Mode=TwoWay}"
+                      SelectionChanged="{x:Bind ViewModel.ColorListSelectionChanged, Mode=OneWay}">
+                <ListView.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="Saved Colors" />
+                    </DataTemplate>
+                </ListView.HeaderTemplate>
+            </ListView>
+
+
+            <StackPanel Grid.Row="4"
+                        Grid.ColumnSpan="3"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+                <Button Command="{x:Bind ViewModel.SelectColorListCommand, Mode=OneWay}"
+                        x:Name="SelectColorListButton">
+                    <Viewbox MaxHeight="16"
+                             MaxWidth="16">
+                        <SymbolIcon Symbol="Accept" />
+                    </Viewbox>
+                </Button>
+                <Button Command="{x:Bind ViewModel.SaveColorListCommand, Mode=OneWay}">
+                    <Viewbox MaxHeight="16"
+                             MaxWidth="16">
+                        <SymbolIcon Symbol="Save" />
+                    </Viewbox>
+                </Button>
+                <Button Command="{x:Bind ViewModel.AddColorListNameCommand, Mode=OneWay}">
+                    <Viewbox MaxHeight="16"
+                             MaxWidth="16">
+                        <SymbolIcon Symbol="Add" />
+                    </Viewbox>
+                </Button>
+                <Button Command="{x:Bind ViewModel.RemoveColorListNameCommand, Mode=OneWay}">
+                    <Viewbox MaxHeight="16"
+                             MaxWidth="16">
+                        <SymbolIcon Symbol="Delete" />
+                    </Viewbox>
+                </Button>
+            </StackPanel>
+
         </Grid>
 
     </Grid>

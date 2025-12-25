@@ -52,6 +52,61 @@ public sealed partial class MainWindow : Window
                                  Color.FromArgb(255, 135, 66, 57)
     ];
 
+    public Dictionary<string, ColorsListEntry> ColorsList = new()
+    {
+        { "Default", new()
+            {
+                colors =
+                [
+                    Color.FromArgb(255, 0x1d, 0x8a, 0x14),
+                    Color.FromArgb(255, 93, 55, 67),
+                    Color.FromArgb(255, 167, 167, 141),
+                    Color.FromArgb(255, 103, 118, 141),
+                    Color.FromArgb(255, 188, 189, 151),
+                    Color.FromArgb(255, 135, 66, 57)
+                ],
+                backgroundColor = Color.FromArgb(255, 250, 246, 240),
+                PauseBetweenRuns = 9,
+                PointsPerCluster = 50,
+                ClustersPerColor = 400
+            }
+        },
+        { "Vibrant", new()
+            {
+                colors =
+                [
+                    Color.FromArgb(255, 229, 57, 53),
+                    Color.FromArgb(255, 251, 192, 45),
+                    Color.FromArgb(255, 30, 136, 229),
+                    Color.FromArgb(255, 67, 160, 71),
+                    Color.FromArgb(255, 142, 36, 170),
+                    Color.FromArgb(255, 255, 112, 67)
+                ],
+                backgroundColor = Color.FromArgb(255, 250, 246, 240),
+                PauseBetweenRuns = 9,
+                PointsPerCluster = 50,
+                ClustersPerColor = 400
+            }
+        },
+        { "Pastel", new()
+            {
+                colors =
+                [
+                    Color.FromArgb(255, 255, 179, 186),
+                    Color.FromArgb(255, 255, 223, 186),
+                    Color.FromArgb(255, 255, 255, 186),
+                    Color.FromArgb(255, 186, 255, 201),
+                    Color.FromArgb(255, 186, 225, 255)
+                ],
+                backgroundColor = Color.FromArgb(255, 250, 246, 240),
+                PauseBetweenRuns = 9,
+                PointsPerCluster = 50,
+                ClustersPerColor = 400
+            }
+        }
+    };
+
+
 
     [field: global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.UI.Xaml.Markup.Compiler", " 3.0.0.2511")]
     public CanvasControl? CanvasControlInstance { get; private set; }
@@ -85,17 +140,18 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         this.Activated += MainWindow_Activated;
 
-        appWindow = GetAppWindowForWindow(this);
-        appWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
-
-        toolWindow = new ToolWindow(this);
 
         CanvasControlInstance = this.Canvas;
 
 
-        // Move the tool window to the secondary display (index 1) and center it there before activation
-        MoveWindowToMonitorCentered(toolWindow, 1, desiredWidthDips: toolWindowWidth, desiredHeightDips: toolWindowHeight);
+        MoveWindowToMonitor(this, 1);
+        appWindow = GetAppWindowForWindow(this);
+        appWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
 
+
+
+        toolWindow = new ToolWindow(this);
+        MoveWindowToMonitorCentered(toolWindow, 0, desiredWidthDips: toolWindowWidth, desiredHeightDips: toolWindowHeight);
 
         AppWindow toolAppWindow = GetAppWindowForWindow(toolWindow);
         if (toolAppWindow.Presenter is OverlappedPresenter overlappedPresenter)
@@ -309,19 +365,36 @@ public sealed partial class MainWindow : Window
         public int ClustersPerColor { get; set; }
         public uint BackgroundColorArgb { get; set; }
         public List<uint>? ColorsArgb { get; set; }
+
+        public Dictionary<string, ColorsListEntryArgb>? ColorsListArgb { get; set; }
     }
 
     public void SaveSettings()
     {
         try
         {
+            Dictionary<string, ColorsListEntryArgb> colorsListArgb = [];
+
+            foreach (KeyValuePair<string, ColorsListEntry> kvp in ColorsList)
+            {
+                colorsListArgb[kvp.Key] = new ColorsListEntryArgb
+                {
+                    colors = kvp.Value.colors.Select(ColorToUint).ToList(),
+                    backgroundColor = ColorToUint(kvp.Value.backgroundColor),
+                    PauseBetweenRuns = kvp.Value.PauseBetweenRuns,
+                    PointsPerCluster = kvp.Value.PointsPerCluster,
+                    ClustersPerColor = kvp.Value.ClustersPerColor
+                };
+            }
+
             AppSettings s = new()
             {
                 PauseBetweenRuns = PauseBetweenRuns,
                 PointsPerCluster = PointsPerCluster,
                 ClustersPerColor = ClustersPerColor,
                 BackgroundColorArgb = ColorToUint(BackgroundColor),
-                ColorsArgb = Colors?.Select(ColorToUint).ToList()
+                ColorsArgb = Colors?.Select(ColorToUint).ToList(),
+                ColorsListArgb = colorsListArgb
             };
 
             JsonSerializerOptions options = new()
@@ -365,6 +438,21 @@ public sealed partial class MainWindow : Window
             {
                 Colors = s.ColorsArgb.Select(UintToColor).ToList();
             }
+
+            if (s.ColorsListArgb != null && s.ColorsListArgb.Count > 0)
+            {
+                ColorsList = s.ColorsListArgb.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => new ColorsListEntry
+                    {
+                        colors = kvp.Value.colors.Select(UintToColor).ToList(),
+                        backgroundColor = UintToColor(kvp.Value.backgroundColor),
+                        PauseBetweenRuns = kvp.Value.PauseBetweenRuns,
+                        PointsPerCluster = kvp.Value.PointsPerCluster,
+                        ClustersPerColor = kvp.Value.ClustersPerColor
+                    }
+                );
+            }
         }
         catch
         {
@@ -372,13 +460,55 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private static uint ColorToUint(Color c) =>
-        (uint)((c.A << 24) | (c.R << 16) | (c.G << 8) | c.B);
 
-    private static Color UintToColor(uint v) =>
-        Color.FromArgb((byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
+
+    private static uint ColorToUint(Color c) => (uint)((c.A << 24) | (c.R << 16) | (c.G << 8) | c.B);
+
+    private static Color UintToColor(uint v) => Color.FromArgb((byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
+
+
+
+
 
     // --- Monitor / window placement helpers ---
+
+    private static void MoveWindowToMonitor(Window window, int monitorIndex)
+    {
+        if (window is null)
+        {
+            return;
+        }
+
+        IntPtr hwnd = WindowNative.GetWindowHandle(window);
+
+        List<RECT> monitors = GetMonitorRects();
+        if (monitorIndex < 0 || monitorIndex >= monitors.Count)
+        {
+            return; // index out of range, do nothing
+        }
+
+        RECT target = monitors[monitorIndex];
+
+        // Move window origin to top-left of monitor. Preserve window size.
+        // Use SetWindowPos with SWP_NOSIZE to keep current size.
+        SetWindowPos(hwnd, IntPtr.Zero, target.Left, target.Top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+    }
+
+
+    private static List<RECT> GetMonitorRects()
+    {
+        List<RECT> list = [];
+        bool callback(IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData)
+        {
+            // Copy the monitor rect passed from EnumDisplayMonitors
+            list.Add(lprcMonitor);
+            return true;
+        }
+
+        // EnumDisplayMonitors marshals callback as MonitorEnumProc
+        EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, callback, IntPtr.Zero);
+        return list;
+    }
 
     /// <summary>
     /// Move and optionally resize the <paramref name="window"/> so it is centered on the specified monitor.
@@ -565,6 +695,7 @@ public sealed partial class MainWindow : Window
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
+    private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOZORDER = 0x0004;
     private const uint SWP_SHOWWINDOW = 0x0040;
 
@@ -577,3 +708,26 @@ public sealed partial class MainWindow : Window
         public int Bottom;
     }
 }
+
+
+
+
+public class ColorsListEntry
+{
+    public List<Color> colors { get; set; } = [];
+    public Color backgroundColor { get; set; }
+
+    public int PauseBetweenRuns { get; set; }
+    public int PointsPerCluster { get; set; }
+    public int ClustersPerColor { get; set; }
+}
+
+public class ColorsListEntryArgb
+{
+    public List<uint> colors { get; set; } = [];
+    public uint backgroundColor { get; set; }
+    public int PauseBetweenRuns { get; set; }
+    public int PointsPerCluster { get; set; }
+    public int ClustersPerColor { get; set; }
+}
+

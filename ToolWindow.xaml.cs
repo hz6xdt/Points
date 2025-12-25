@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +41,12 @@ public sealed partial class ToolWindow : Window
         this.mainWindow = mainWindow;
 
         ViewModel?.Colors = new ObservableCollection<ColorItem>(mainWindow.Colors.Select(c => new ColorItem { DisplayColor = new SolidColorBrush(c) }));
+        ViewModel?.ColorsList = new Dictionary<string, (List<ColorItem> colors, ColorItem backgroundColor)>(mainWindow.ColorsList.ToDictionary(
+            kvp => kvp.Key,
+            kvp => (kvp.Value.colors.Select(c => new ColorItem { DisplayColor = new SolidColorBrush(c) }).ToList(),
+                new ColorItem { DisplayColor = new SolidColorBrush(kvp.Value.backgroundColor) }
+            )));
+        ViewModel?.ColorsListNames = new ObservableCollection<string>(mainWindow.ColorsList.Keys);
         ViewModel?.BackgroundColor = new ColorItem { DisplayColor = new SolidColorBrush(mainWindow.BackgroundColor) };
         ViewModel?.PauseBetweenRuns = mainWindow.PauseBetweenRuns;
         ViewModel?.PointsPerCluster = mainWindow.PointsPerCluster;
@@ -54,13 +61,28 @@ public sealed partial class ToolWindow : Window
         PauseBetweenRunsResetButton.Focus(FocusState.Programmatic);
     }
 
+    public void FocusPointsPerClusterNumberBox()
+    {
+        PointsPerClusterNumberBox.Focus(FocusState.Programmatic);
+    }
+
     public void FocusPointsPerClusterResetButton()
     {
         PointsPerClusterResetButton.Focus(FocusState.Programmatic);
     }
 
+    public void FocusClustersPerColorNumberBox()
+    {
+        ClustersPerColorNumberBox.Focus(FocusState.Programmatic);
+    }
+
     public void FocusClustersPerColorResetButton()
     {
         ClustersPerColorResetButton.Focus(FocusState.Programmatic);
+    }
+
+    public void FocusSelectColorListButton()
+    {
+        SelectColorListButton.Focus(FocusState.Programmatic);
     }
 }

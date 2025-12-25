@@ -1,7 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 namespace Points;
@@ -16,6 +18,13 @@ public partial class ToolsViewModel : ObservableObject
 
     [ObservableProperty]
     public partial ObservableCollection<ColorItem> Colors { get; set; } = [];
+
+    [ObservableProperty]
+    public partial ObservableCollection<string> ColorsListNames { get; set; } = [];
+
+    public Dictionary<string, (List<ColorItem> colors, ColorItem backgroundColor)> ColorsList { get; set; } = [];
+
+
 
     [ObservableProperty]
     public partial ColorItem? BackgroundColor { get; set; }
@@ -37,6 +46,14 @@ public partial class ToolsViewModel : ObservableObject
     public partial int SelectedColorIndex { get; set; } = -1;
 
 
+    [ObservableProperty]
+    public partial string SelectedColorListName { get; set; }
+
+    [ObservableProperty]
+    public partial int SelectedColorListIndex { get; set; } = -1;
+
+
+
     [RelayCommand]
     public void AddColor()
     {
@@ -50,6 +67,11 @@ public partial class ToolsViewModel : ObservableObject
             BackgroundColor?.Color = ToolWindow.SelectedColor;
             MainWindow?.BackgroundColor = ToolWindow.SelectedColor;
             isBackgroundColorSelected = false;
+
+            if (SelectedColorListIndex != -1)
+            {
+                MainWindow?.ColorsList[SelectedColorListName].backgroundColor = ToolWindow.SelectedColor;
+            }
         }
         else
         {
@@ -63,6 +85,11 @@ public partial class ToolsViewModel : ObservableObject
             }
             Colors = new ObservableCollection<ColorItem>(Colors);
             MainWindow?.Colors = Colors.Select(c => c.Color).ToList();
+
+            if (SelectedColorIndex != -1)
+            {
+                MainWindow?.ColorsList[SelectedColorListName].colors = Colors.Select(c => c.Color).ToList();
+            }
         }
 
         MainWindow?.CanvasControlInstance?.Invalidate();
@@ -79,6 +106,38 @@ public partial class ToolsViewModel : ObservableObject
         MainWindow?.Colors = Colors.Select(c => c.Color).ToList();
         MainWindow?.CanvasControlInstance?.Invalidate();
     }
+
+    [RelayCommand]
+    public void RemoveColorListName()
+    {
+        if (SelectedColorListIndex != -1)
+        {
+            MainWindow?.ColorsList.Remove(SelectedColorListName);
+            ColorsListNames.Remove(SelectedColorListName);
+        }
+    }
+
+    [RelayCommand]
+    public void SelectColorList()
+    {
+        if (ToolWindow == null || SelectedColorListName == null || MainWindow == null)
+        {
+            return;
+        }
+
+        SelectedColorIndex = -1;
+        SelectedColor = null;
+
+        if (MainWindow.ColorsList.TryGetValue(SelectedColorListName, out ColorsListEntry? colorItems))
+        {
+            Colors = new ObservableCollection<ColorItem>(colorItems.colors.Select(c => new ColorItem { Color = c }));
+            BackgroundColor = new ColorItem { Color = colorItems.backgroundColor };
+            MainWindow.Colors = Colors.Select(c => c.Color).ToList();
+            MainWindow.BackgroundColor = BackgroundColor.Color;
+            MainWindow.CanvasControlInstance?.Invalidate();
+        }
+    }
+
 
     [RelayCommand]
     public void SelectBackgroundColor()
@@ -104,6 +163,7 @@ public partial class ToolsViewModel : ObservableObject
             return;
         }
         MainWindow.PauseBetweenRuns = PauseBetweenRuns;
+        ToolWindow?.FocusPointsPerClusterNumberBox();
     }
 
     [RelayCommand]
@@ -114,6 +174,7 @@ public partial class ToolsViewModel : ObservableObject
             return;
         }
         MainWindow.PointsPerCluster = PointsPerCluster;
+        ToolWindow?.FocusClustersPerColorNumberBox();
 
         MainWindow?.CanvasControlInstance?.Invalidate();
     }
@@ -126,21 +187,116 @@ public partial class ToolsViewModel : ObservableObject
             return;
         }
         MainWindow.ClustersPerColor = ClustersPerColor;
+        ToolWindow?.FocusSelectColorListButton();
 
         MainWindow?.CanvasControlInstance?.Invalidate();
     }
 
 
     [RelayCommand]
-    public void SaveSettings()
+    public void SaveColorList()
     {
-        if (MainWindow == null)
+        if (ToolWindow == null)
         {
             return;
         }
 
-        MainWindow.SaveSettings();
+        ContentDialog saveDialog = new()
+        {
+            XamlRoot = ToolWindow.Content.XamlRoot,
+            Title = "Save Colors",
+            Content = new StackPanel
+            {
+                Children =
+                                    {
+                                        new TextBlock { Text = "Save these colors as:", Margin = new Thickness(0,0,0,10) },
+                                        new TextBox { Text = SelectedColorListName ?? string.Empty, Width=250 }
+                                    }
+            },
+            CloseButtonText = "Cancel",
+            PrimaryButtonText = "Save",
+            DefaultButton = ContentDialogButton.Primary
+        };
+        saveDialog.PrimaryButtonClick += (s, e) =>
+        {
+            if (saveDialog.Content is StackPanel stackPanel)
+            {
+                foreach (UIElement child in stackPanel.Children)
+                {
+                    if (child is TextBox inputTextBox)
+                    {
+                        ColorsList[inputTextBox.Text] = (Colors.ToList(), BackgroundColor!);
+                        MainWindow?.ColorsList[inputTextBox.Text] = new ColorsListEntry
+                        {
+                            colors = Colors.Select(c => c.Color).ToList(),
+                            backgroundColor = BackgroundColor!.Color,
+                            PauseBetweenRuns = PauseBetweenRuns,
+                            PointsPerCluster = PointsPerCluster,
+                            ClustersPerColor = ClustersPerColor
+                        };
+
+                        if (!ColorsListNames.Contains(inputTextBox.Text))
+                        {
+                            ColorsListNames.Add(inputTextBox.Text);
+                        }
+                    }
+                }
+            }
+        };
+        _ = saveDialog.ShowAsync();
     }
+
+
+    [RelayCommand]
+    public void AddColorListName()
+    {
+        ContentDialog addDialog = new()
+        {
+            XamlRoot = ToolWindow!.Content.XamlRoot,
+            Title = "Add Color List",
+            Content = new StackPanel
+            {
+                Children =
+                                    {
+                                        new TextBlock { Text = "Enter a name for the new color list:", Margin = new Thickness(0,0,0,10) },
+                                        new TextBox { Width=250 }
+                                    }
+            },
+            CloseButtonText = "Cancel",
+            PrimaryButtonText = "Add",
+            DefaultButton = ContentDialogButton.Primary
+        };
+        addDialog.PrimaryButtonClick += (s, e) =>
+        {
+            if (addDialog.Content is StackPanel stackPanel)
+            {
+                foreach (UIElement child in stackPanel.Children)
+                {
+                    if (child is TextBox inputTextBox)
+                    {
+                        if (!ColorsListNames.Contains(inputTextBox.Text))
+                        {
+                            ColorsListNames.Add(inputTextBox.Text);
+                            ColorsList[inputTextBox.Text] = (Colors.ToList(), BackgroundColor!);
+                            MainWindow?.ColorsList[inputTextBox.Text] = new ColorsListEntry
+                            {
+                                colors = Colors.Select(c => c.Color).ToList(),
+                                backgroundColor = BackgroundColor!.Color,
+                                PauseBetweenRuns = PauseBetweenRuns,
+                                PointsPerCluster = PointsPerCluster,
+                                ClustersPerColor = ClustersPerColor
+                            };
+                            SelectedColorListIndex = ColorsListNames.Count - 1;
+                            SelectedColorListName = inputTextBox.Text;
+                        }
+                    }
+                }
+            }
+        };
+
+        _ = addDialog.ShowAsync();
+    }
+
 
     public void ColorSelectionChanged(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)
     {
@@ -153,12 +309,25 @@ public partial class ToolsViewModel : ObservableObject
     }
 
 
+    public void ColorListSelectionChanged(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)
+    {
+        if (ToolWindow == null || SelectedColorListName == null)
+        {
+            return;
+        }
+
+        SelectColorList();
+    }
+
+
+
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
     public void PauseBetweenRunsValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
     {
         ToolWindow?.FocusPauseBetweenRunsResetButton();
     }
+
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Event Signature")]
     public void PointsPerClusterValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e)
