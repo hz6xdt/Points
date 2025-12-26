@@ -197,7 +197,7 @@ public partial class ToolsViewModel : ObservableObject
             return;
         }
         MainWindow.ClustersPerColor = ClustersPerColor;
-        ToolWindow?.FocusSelectColorListButton();
+        ToolWindow?.FocusSaveColorListButton();
 
         MainWindow?.CanvasControlInstance?.Invalidate();
     }

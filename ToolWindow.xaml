@@ -208,8 +208,7 @@
                         Grid.ColumnSpan="3"
                         Orientation="Horizontal"
                         HorizontalAlignment="Center">
-                <Button Command="{x:Bind ViewModel.SelectColorListCommand, Mode=OneWay}"
-                        x:Name="SelectColorListButton">
+                <Button Command="{x:Bind ViewModel.SelectColorListCommand, Mode=OneWay}">
                     <Viewbox MaxHeight="16"
                              MaxWidth="16">
                         <SymbolIcon Symbol="Accept" />

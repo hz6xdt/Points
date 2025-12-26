@@ -81,11 +81,6 @@ public sealed partial class ToolWindow : Window
         ClustersPerColorResetButton.Focus(FocusState.Programmatic);
     }
 
-    public void FocusSelectColorListButton()
-    {
-        SelectColorListButton.Focus(FocusState.Programmatic);
-    }
-
     public void FocusSaveColorListButton()
     {
         SaveColorListButton.Focus(FocusState.Programmatic);
