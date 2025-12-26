@@ -132,10 +132,20 @@ public partial class ToolsViewModel : ObservableObject
         {
             Colors = new ObservableCollection<ColorItem>(colorItems.colors.Select(c => new ColorItem { Color = c }));
             BackgroundColor = new ColorItem { Color = colorItems.backgroundColor };
+            PauseBetweenRuns = colorItems.PauseBetweenRuns;
+            PointsPerCluster = colorItems.PointsPerCluster;
+            ClustersPerColor = colorItems.ClustersPerColor;
+
             MainWindow.Colors = Colors.Select(c => c.Color).ToList();
             MainWindow.BackgroundColor = BackgroundColor.Color;
+            MainWindow.PauseBetweenRuns = PauseBetweenRuns;
+            MainWindow.PointsPerCluster = PointsPerCluster;
+            MainWindow.ClustersPerColor = ClustersPerColor;
+
             MainWindow.CanvasControlInstance?.Invalidate();
         }
+
+        ToolWindow.FocusSaveColorListButton();
     }
 
 

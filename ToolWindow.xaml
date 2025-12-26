@@ -198,7 +198,7 @@
                       SelectionChanged="{x:Bind ViewModel.ColorListSelectionChanged, Mode=OneWay}">
                 <ListView.HeaderTemplate>
                     <DataTemplate>
-                        <TextBlock Text="Saved Colors" />
+                        <TextBlock Text="Saved Color Lists" />
                     </DataTemplate>
                 </ListView.HeaderTemplate>
             </ListView>
@@ -215,7 +215,8 @@
                         <SymbolIcon Symbol="Accept" />
                     </Viewbox>
                 </Button>
-                <Button Command="{x:Bind ViewModel.SaveColorListCommand, Mode=OneWay}">
+                <Button Command="{x:Bind ViewModel.SaveColorListCommand, Mode=OneWay}"
+                        x:Name="SaveColorListButton">
                     <Viewbox MaxHeight="16"
                              MaxWidth="16">
                         <SymbolIcon Symbol="Save" />
